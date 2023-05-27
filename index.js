@@ -1,33 +1,50 @@
 import express from 'express';
+import dotenv from 'dotenv';
 
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, onValue } from "firebase/database";
+// import { getDatabase, ref, onValue } from "firebase/database";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
 const app = express();
+dotenv.config();
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA1bj7tx52GPJO8Qo1XpkEXY7E1E69dCHU",
+  apiKey: process.env.APIKEY,
   authDomain: "promptbase-85650.firebaseapp.com",
   databaseURL: "https://promptbase-85650-default-rtdb.firebaseio.com",
   projectId: "promptbase-85650",
   storageBucket: "promptbase-85650.appspot.com",
-  messagingSenderId: "859520305437",
-  appId: "1:859520305437:web:c6ab75e3f7ab4962df39f4",
+  messagingSenderId: process.env.MESSAGINGSENDERID,
+  appId: process.env.APPID,
   measurementId: "G-TJWLEQ3DHX"
 };
 
 const appData = initializeApp(firebaseConfig);
-const database = getDatabase(appData);
+const database = getFirestore(appData);
 
 
-app.get('/api', (req, res) => {
-  const dataInfo = ref(database);
-  onValue(dataInfo, (snapshot) => {
-    const data = snapshot.val();
-    res.json(data)
-  });
+app.get('/api/sales', async (req, res) => {
+  
+    const result = await getDoc(doc(database, "promptBrokerApi", "sales"));
+    if(result.exists()) {
+      res.json(result.data())
+    } else {
+      res.json("No data found")
+    }
+
+});
+app.get('/api/users', async (req, res) => {
+  
+    const result = await getDoc(doc(database, "promptBrokerApi", "users"));
+    if(result.exists()) {
+      res.json(result.data())
+    } else {
+      res.json("No data found")
+    }
+
 });
 
-app.listen(3005, ()=> {
+
+app.listen(3005, () => {
   console.log("App is running on port 3005")
 })
